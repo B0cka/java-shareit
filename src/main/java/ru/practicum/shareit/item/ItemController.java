@@ -25,7 +25,7 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto find(@PathVariable("itemId") long itemId){
+    public ItemDto find(@PathVariable("itemId") long itemId) {
         return itemService.findItem(itemId);
     }
 
