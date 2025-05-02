@@ -74,11 +74,11 @@ class UserServiceImpl implements UserService {
         repository.deleteById(id);
     }
 
-    public void validate(User user){
-        if(user.getEmail() == null){
+    public void validate(User user) {
+        if (user.getEmail() == null) {
             throw new ValidationException("Email not found");
         }
-        if(!user.getEmail().contains("@")){
+        if (!user.getEmail().contains("@")) {
             throw new ValidationException("Email must be with @");
         }
     }
