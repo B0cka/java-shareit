@@ -8,6 +8,7 @@ import java.util.*;
 public class UserRepositoryImpl implements UserRepository {
 
     private final Map<Long, User> storage = new HashMap<>();
+
     private long currentId = 1;
 
     public Optional<User> findById(Long id) {
