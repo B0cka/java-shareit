@@ -66,7 +66,7 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
-    public ItemDto findItem(long itemId){
+    public ItemDto findItem(long itemId) {
         log.info("find item by id: {}", itemId);
         Item item = itemRepository.findById(itemId);
         if (item == null) {
@@ -78,16 +78,16 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto addNewItem(Long userId, ItemDto itemDto) {
         Item item = ItemMapper.toItem(itemDto, userId);
-        if(userRepository.findById(userId).isEmpty()){
+        if (userRepository.findById(userId).isEmpty()) {
             throw new NotFoundException("User with id " + userId + " not found");
         }
-        if(itemDto.getAvailable() == null){
+        if (itemDto.getAvailable() == null) {
             throw new ValidationException("Available must be not empty!");
         }
-        if(itemDto.getName() == "" || itemDto.getName() == null){
+        if (itemDto.getName() == "" || itemDto.getName() == null) {
             throw new ValidationException("Name must be not empty!");
         }
-        if(itemDto.getDescription() == null){
+        if (itemDto.getDescription() == null) {
             throw new ValidationException("Description must be not empty!");
         }
         item.setOwnerId(userId);
