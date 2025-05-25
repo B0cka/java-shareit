@@ -27,7 +27,8 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
         log.info("Update item with id={} by userId={}", itemId, userId);
 
-        Item existingItem = itemRepository.findById(itemId);
+        Item existingItem = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item not found"));
         if (existingItem == null) {
             throw new NotFoundException("Item not found");
         }
@@ -68,7 +69,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto findItem(long itemId) {
         log.info("find item by id: {}", itemId);
-        Item item = itemRepository.findById(itemId);
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item not found"));
         if (item == null) {
             throw new NotFoundException("Item with id " + itemId + " not found");
         }
@@ -98,7 +100,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getItems(Long userId) {
         log.info("Запрос на все предметы");
-        return itemRepository.findByUserId(userId)
+        return itemRepository.findByOwnerId(userId)
                 .stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
