@@ -4,13 +4,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +27,8 @@ public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
@@ -111,5 +118,48 @@ public class ItemServiceImpl implements ItemService {
         log.info("Удаление предмета");
         itemRepository.deleteByUserIdAndItemId(userId, itemId);
     }
+
+    @Override
+    public Comment addComment(long userId, long itemId, String description) {
+        log.info("Добавление комментария");
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
+
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item not found with id: " + itemId));
+
+        Booking booking = bookingRepository.findFirstByBookerIdAndItemIdAndEndTimeBeforeOrderByEndTimeDesc(
+                userId, itemId, LocalDateTime.now()
+        ).orElseThrow(() -> new ValidationException("User has not completed booking for this item"));
+
+        Comment comment = new Comment();
+        comment.setAuthor(user);
+        comment.setBooking(booking);
+        comment.setItem(item);
+        comment.setDescription(description);
+        comment.setCreated(LocalDateTime.now());
+
+        return commentRepository.save(comment);
+    }
+
+    public List<Comment> getComments(long userId) {
+        log.info("Запрос на получение всех комментариев user с id: " + userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
+
+        return commentRepository.findByAuthorId(userId);
+    }
+
+    public List<Comment> getCommentsById(long userId, long itemId) {
+        log.info("Запрос на получение всех комментариев к item с id: " + itemId + " от user с id: " + userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
+
+        return commentRepository.findByItemId(itemId);
+    }
+
 
 }
