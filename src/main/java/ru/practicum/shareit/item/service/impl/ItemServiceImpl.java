@@ -1,18 +1,25 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoBooking;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 
 import java.time.LocalDateTime;
@@ -74,17 +81,6 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
-    public ItemDto findItem(long itemId) {
-        log.info("find item by id: {}", itemId);
-        Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Item not found"));
-        if (item == null) {
-            throw new NotFoundException("Item with id " + itemId + " not found");
-        }
-        return ItemMapper.toItemDto(item);
-    }
-
-    @Override
     public ItemDto addNewItem(Long userId, ItemDto itemDto) {
         Item item = ItemMapper.toItem(itemDto, userId);
         if (userRepository.findById(userId).isEmpty()) {
@@ -105,12 +101,20 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getItems(Long userId) {
-        log.info("Запрос на все предметы");
-        return itemRepository.findByOwnerId(userId)
-                .stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+    public ItemDtoBooking getItemWithComments(Long itemId) {
+        log.info("request to get item with id {}", itemId);
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Предмет не найден"));
+
+        List<Booking> bookings = bookingRepository.findByItemidAndStatus(itemId, BookingStatus.WAITING);
+
+        List<Comment> comments = commentRepository.findByItemid(itemId);
+
+        ItemDtoBooking itemDtoBooking = ItemMapper.mapToItemDtoBooking(item,
+                bookings,
+                comments);
+
+        return itemDtoBooking;
     }
 
     @Override
@@ -120,8 +124,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Comment addComment(long userId, long itemId, String description) {
-        log.info("Добавление комментария");
+    public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
+        log.info("Добавление комментария от пользователя {} к вещи {}", userId, itemId);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
@@ -135,12 +139,14 @@ public class ItemServiceImpl implements ItemService {
 
         Comment comment = new Comment();
         comment.setAuthor(user);
-        comment.setBooking(booking);
         comment.setItem(item);
-        comment.setDescription(description);
+        comment.setDescription(commentDto.getText());
         comment.setCreated(LocalDateTime.now());
+        comment.setBooking(booking);
 
-        return commentRepository.save(comment);
+        Comment saved = commentRepository.save(comment);
+
+        return ItemMapper.mapToDto(saved);
     }
 
     public List<Comment> getComments(long userId) {
@@ -150,15 +156,6 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
 
         return commentRepository.findByAuthorId(userId);
-    }
-
-    public List<Comment> getCommentsById(long userId, long itemId) {
-        log.info("Запрос на получение всех комментариев к item с id: " + itemId + " от user с id: " + userId);
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
-
-        return commentRepository.findByItemId(itemId);
     }
 
 

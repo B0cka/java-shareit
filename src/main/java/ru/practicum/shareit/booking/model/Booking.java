@@ -1,9 +1,10 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
@@ -24,6 +25,14 @@ public class Booking {
 
     @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
+
+    public LocalDateTime getEndTime(){
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime end){
+        this.endTime = end;
+    }
 
     @ManyToOne
     @JoinColumn(name = "item_id", nullable = false)

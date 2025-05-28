@@ -1,16 +1,22 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.dto.BookingMapper;
+import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.booking.enums.BookingState;
+import ru.practicum.shareit.booking.enums.BookingStatus;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,9 +25,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
 
-    BookingRepository bookingRepository;
-    UserRepository userRepository;
-    ItemRepository itemRepository;
+    private final BookingRepository bookingRepository;
+    private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
 
     @Override
     public BookingResponseDto addBooking(Long userId, BookingRequestDto bookingDto) {
@@ -31,11 +37,27 @@ public class BookingServiceImpl implements BookingService {
         Item item = itemRepository.findById(bookingDto.getItemId())
                 .orElseThrow(() -> new NotFoundException("Item not found with id: " + bookingDto.getItemId()));
 
+        if(!item.getAvailable()){
+            throw new ValidationException("item must be available!");
+        }
+
+        if(bookingDto.getEnd().isBefore(LocalDateTime.now())){
+            throw new ValidationException("end can not be in the past!");
+        }
+
+        if(bookingDto.getStart().equals(bookingDto.getEnd())){
+            throw new ValidationException("start can not be in the past!");
+        }
+
+        if(bookingDto.getStart().isBefore(LocalDateTime.now())){
+            throw new ValidationException("start can not be in the past!");
+        }
+
         Booking booking = BookingMapper.toBooking(bookingDto, user, item);
         booking.setStatus(BookingStatus.WAITING);
 
-        bookingRepository.save(booking);
-        return BookingMapper.toBookingResponseDto(booking);
+        Booking saved = bookingRepository.save(booking);
+        return BookingMapper.toBookingResponseDto(saved);
     }
 
     @Override
@@ -46,7 +68,7 @@ public class BookingServiceImpl implements BookingService {
         Item item = booking.getItem();
 
         if (!item.getOwnerId().equals(userId)) {
-            throw new NotFoundException("Only the owner of the item can approve the booking.");
+            throw new ValidationException("Only the owner of the item can approve the booking.");
         }
 
         if (booking.getStatus() != BookingStatus.WAITING) {
