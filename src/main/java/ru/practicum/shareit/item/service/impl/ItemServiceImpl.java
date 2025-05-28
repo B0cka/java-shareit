@@ -106,9 +106,9 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Предмет не найден"));
 
-        List<Booking> bookings = bookingRepository.findByItemidAndStatus(itemId, BookingStatus.WAITING);
+        List<Booking> bookings = bookingRepository.findByItem_idAndStatus(itemId, BookingStatus.WAITING);
 
-        List<Comment> comments = commentRepository.findByItemid(itemId);
+        List<Comment> comments = commentRepository.findByItem_id(itemId);
 
         ItemDtoBooking itemDtoBooking = ItemMapper.mapToItemDtoBooking(item,
                 bookings,
@@ -158,5 +158,16 @@ public class ItemServiceImpl implements ItemService {
         return commentRepository.findByAuthorId(userId);
     }
 
+    public List<ItemDto> allItemsFormUser(long userId){
+        log.info("reauest to get all items from user with id: {}", userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
+        List<Item> item = itemRepository.findByOwnerId(userId);
+
+        return item.stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList()
+        );
+    }
 
 }

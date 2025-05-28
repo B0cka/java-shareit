@@ -32,7 +32,7 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemDto add(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ItemDto add(@RequestHeader("X-Sharer-User-Id") long userId,
                        @RequestBody ItemDto itemDto) {
         return itemService.addNewItem(userId, itemDto);
     }
@@ -41,6 +41,11 @@ public class ItemController {
     public void deleteItem(@RequestHeader("X-Sharer-User-Id") long userId,
                            @PathVariable long itemId) {
         itemService.deleteItem(userId, itemId);
+    }
+
+    @GetMapping
+    public List<ItemDto> allItemsFormUser(@RequestHeader("X-Sharer-User-Id") long userId){
+        return itemService.allItemsFormUser(userId);
     }
 
 }

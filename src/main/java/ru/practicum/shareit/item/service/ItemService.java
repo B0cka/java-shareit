@@ -16,11 +16,11 @@ public interface ItemService {
 
     ItemDto updateItem(long userId, long itemId, ItemDto itemDto);
 
-
     List<ItemDto> searchItems(String text);
 
     CommentDto addComment(long userId, long itemId, CommentDto commentDto);
 
     List<Comment> getComments(long userId);
 
+    List<ItemDto> allItemsFormUser(long userId);
 }
