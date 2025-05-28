@@ -44,7 +44,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> allItemsFormUser(@RequestHeader("X-Sharer-User-Id") long userId){
+    public List<ItemDto> allItemsFormUser(@RequestHeader("X-Sharer-User-Id") long userId) {
         return itemService.allItemsFormUser(userId);
     }
 

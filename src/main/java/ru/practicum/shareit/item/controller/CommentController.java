@@ -21,7 +21,7 @@ public class CommentController {
     }
 
     @GetMapping("/comments")
-    public List<Comment> getComments(@RequestHeader("X-Sharer-User-Id") long userId){
+    public List<Comment> getComments(@RequestHeader("X-Sharer-User-Id") long userId) {
         return itemService.getComments(userId);
     }
 
