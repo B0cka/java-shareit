@@ -21,7 +21,7 @@ public class Comment {
     private User author;
 
     @ManyToOne
-    @JoinColumn(name = "booked_id", nullable = false)
+    @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 
     @ManyToOne
