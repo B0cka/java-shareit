@@ -37,19 +37,19 @@ public class BookingServiceImpl implements BookingService {
         Item item = itemRepository.findById(bookingDto.getItemId())
                 .orElseThrow(() -> new NotFoundException("Item not found with id: " + bookingDto.getItemId()));
 
-        if(!item.getAvailable()){
+        if (!item.getAvailable()) {
             throw new ValidationException("item must be available!");
         }
 
-        if(bookingDto.getEnd().isBefore(LocalDateTime.now())){
+        if (bookingDto.getEnd().isBefore(LocalDateTime.now())) {
             throw new ValidationException("end can not be in the past!");
         }
 
-        if(bookingDto.getStart().equals(bookingDto.getEnd())){
+        if (bookingDto.getStart().equals(bookingDto.getEnd())) {
             throw new ValidationException("start can not be in the past!");
         }
 
-        if(bookingDto.getStart().isBefore(LocalDateTime.now())){
+        if (bookingDto.getStart().isBefore(LocalDateTime.now())) {
             throw new ValidationException("start can not be in the past!");
         }
 

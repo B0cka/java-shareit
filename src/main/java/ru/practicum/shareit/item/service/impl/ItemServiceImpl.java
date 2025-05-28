@@ -158,7 +158,7 @@ public class ItemServiceImpl implements ItemService {
         return commentRepository.findByAuthorId(userId);
     }
 
-    public List<ItemDto> allItemsFormUser(long userId){
+    public List<ItemDto> allItemsFormUser(long userId) {
         log.info("reauest to get all items from user with id: {}", userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
@@ -167,7 +167,7 @@ public class ItemServiceImpl implements ItemService {
         return item.stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList()
-        );
+                );
     }
 
 }
