@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.enums.BookingStatus;
@@ -38,6 +39,7 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
 
     @Override
+    @Transactional
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
         log.info("Update item with id={} by userId={}", itemId, userId);
 
@@ -81,6 +83,7 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
+    @Transactional
     public ItemDto addNewItem(Long userId, ItemDto itemDto) {
         Item item = ItemMapper.toItem(itemDto, userId);
         if (userRepository.findById(userId).isEmpty()) {
@@ -124,6 +127,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
         log.info("Добавление комментария от пользователя {} к вещи {}", userId, itemId);
 

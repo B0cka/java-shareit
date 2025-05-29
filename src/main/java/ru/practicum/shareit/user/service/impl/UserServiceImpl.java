@@ -3,6 +3,7 @@ package ru.practicum.shareit.user.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -34,6 +35,7 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public User saveUser(User user) {
         log.info("Запрос на создание пользователя");
         validate(user);
@@ -50,6 +52,7 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public User updateUser(Long id, UserDto userDto) {
         log.info("Запрос на обновление пользователя id={}", id);
         User existingUser = repository.findById(id)
@@ -73,6 +76,7 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long id) {
         log.info("Запрос на удаление пользователя id={}", id);
         repository.deleteById(id);
