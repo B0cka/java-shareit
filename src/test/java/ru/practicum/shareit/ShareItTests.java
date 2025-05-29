@@ -8,9 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("test")
 @SpringBootTest(
-		webEnvironment = SpringBootTest.WebEnvironment.NONE,
+		webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
 		classes = ShareItApp.class
 )
+
 class ShareItTests {
 
 	@Test
