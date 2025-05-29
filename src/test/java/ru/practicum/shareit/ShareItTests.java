@@ -6,16 +6,14 @@ import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ActiveProfiles("test")
 @SpringBootTest(
-		webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
+		webEnvironment = SpringBootTest.WebEnvironment.NONE,
 		classes = ShareItApp.class
 )
 
 class ShareItTests {
 
 	@Test
-
 	void contextLoads() {
 		assertTrue(true);
 	}
