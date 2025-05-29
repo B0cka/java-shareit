@@ -6,3 +6,5 @@ on:
 jobs:
   build:
     uses: yandex-praktikum/java-shareit/.github/workflows/api-tests.yml@ci
+      - name: Run tests
+        run: ./gradlew test -Dspring.profiles.active=ci
