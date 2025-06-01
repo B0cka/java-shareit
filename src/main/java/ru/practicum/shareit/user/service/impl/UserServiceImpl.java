@@ -1,10 +1,15 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +19,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 class UserServiceImpl implements UserService {
 
-    private final UserRepositoryImpl repository;
+    private final UserRepository repository;
 
     @Override
     public List<User> getAllUsers() {
@@ -30,6 +35,7 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public User saveUser(User user) {
         log.info("Запрос на создание пользователя");
         validate(user);
@@ -46,6 +52,7 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public User updateUser(Long id, UserDto userDto) {
         log.info("Запрос на обновление пользователя id={}", id);
         User existingUser = repository.findById(id)
@@ -69,6 +76,7 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long id) {
         log.info("Запрос на удаление пользователя id={}", id);
         repository.deleteById(id);
