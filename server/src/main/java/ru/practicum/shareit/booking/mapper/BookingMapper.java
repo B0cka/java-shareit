@@ -12,28 +12,32 @@ import ru.practicum.shareit.user.dto.UserDtoShort;
 public class BookingMapper {
 
     public static Booking toBooking(BookingRequestDto dto, User booker, Item item) {
-        Booking booking = new Booking();
-        booking.setStart(dto.getStart());
-        booking.setEndTime(dto.getEnd());
-        booking.setItem(item);
-        booking.setBooker(booker);
+        Booking booking =  Booking.builder()
+                .start(dto.getStart())
+                .endTime(dto.getEnd())
+                .item(item)
+                .booker(booker)
+                .build();
         return booking;
     }
 
     public static BookingResponseDto toBookingResponseDto(Booking booking) {
-        BookingResponseDto dto = new BookingResponseDto();
-        dto.setId(booking.getId());
-        dto.setStart(booking.getStart());
-        dto.setEnd(booking.getEndTime());
-        dto.setStatus(booking.getStatus());
+        BookingResponseDto dto = BookingResponseDto.builder()
+                .id(booking.getId())
+                .start(booking.getStart())
+                .end(booking.getEndTime())
+                .status(booking.getStatus())
+                .build();
 
-        UserDtoShort booker = new UserDtoShort();
-        booker.setId(booking.getBooker().getId());
+        UserDtoShort booker = UserDtoShort.builder()
+                .id(booking.getBooker().getId())
+                .build();
         dto.setBooker(booker);
 
-        ItemDtoShort item = new ItemDtoShort();
-        item.setId(booking.getItem().getId());
-        item.setName(booking.getItem().getName());
+        ItemDtoShort item = ItemDtoShort.builder()
+                .id(booking.getItem().getId())
+                .name(booking.getItem().getName())
+                .build();
         dto.setItem(item);
 
         return dto;

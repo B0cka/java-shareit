@@ -18,20 +18,22 @@ public class ItemMapper {
     private final BookingMapper bookingMapper;
 
     public static Item toItem(ItemDto itemDto, Long ownerId) {
-        Item item = new Item();
-        item.setName(itemDto.getName());
-        item.setDescription(itemDto.getDescription());
-        item.setAvailable(itemDto.getAvailable());
-        item.setOwnerId(ownerId);
+        Item item = Item.builder()
+                .name(itemDto.getName())
+                .description(itemDto.getDescription())
+                .available(itemDto.getAvailable())
+                .ownerId(ownerId)
+                .build();
         return item;
     }
 
     public static ItemDto toItemDto(Item item) {
-        ItemDto itemDto = new ItemDto();
-        itemDto.setId(item.getId());
-        itemDto.setName(item.getName());
-        itemDto.setDescription(item.getDescription());
-        itemDto.setAvailable(item.getAvailable());
+        ItemDto itemDto = ItemDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .build();
         return itemDto;
     }
 
@@ -64,11 +66,12 @@ public class ItemMapper {
     public static List<ItemDto> toItemDtoList(List<Item> items) {
         return items.stream()
                 .map(item -> {
-                    ItemDto itemDto = new ItemDto();
-                    itemDto.setId(item.getId());
-                    itemDto.setName(item.getName());
-                    itemDto.setDescription(item.getDescription());
-                    itemDto.setAvailable(item.getAvailable());
+                    ItemDto itemDto = ItemDto.builder()
+                            .id(item.getId())
+                            .name(item.getName())
+                            .description(item.getDescription())
+                            .available(item.getAvailable())
+                            .build();
                     return itemDto;
                 })
                 .collect(Collectors.toList());

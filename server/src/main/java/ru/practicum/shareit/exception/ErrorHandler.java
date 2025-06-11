@@ -4,9 +4,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
@@ -23,6 +25,18 @@ public class ErrorHandler {
                 ),
                 HttpStatus.NOT_FOUND
         );
+    }
+
+    @ExceptionHandler(NoAccessException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    public Map<String, Object> handleNoAccessException(NoAccessException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", 403);
+        body.put("error", "Forbidden");
+        body.put("message", ex.getMessage());
+        body.put("timestamp", LocalDateTime.now());
+        return body;
     }
 
     @ExceptionHandler(ConflictException.class)
