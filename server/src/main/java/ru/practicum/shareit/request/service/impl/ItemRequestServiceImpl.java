@@ -32,7 +32,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRepository itemRepository;
 
     @Override
-    public ItemRequestDto createRequest(Long userId, ItemRequestCreateDto responseDto){
+    public ItemRequestDto createRequest(Long userId, ItemRequestCreateDto responseDto) {
         log.info("Create user with id: {}", userId);
 
         User user = userRepository.findById(userId)
@@ -85,7 +85,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public List<ItemRequestDto> getAllRequests(Long userId){
+    public List<ItemRequestDto> getAllRequests(Long userId) {
         log.info("Get ALL requests");
 
         List<ItemRequest> requests = itemRequestRepository.findAllByRequestorIdNotOrderByCreatedDesc(userId);

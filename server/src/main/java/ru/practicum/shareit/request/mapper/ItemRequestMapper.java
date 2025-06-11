@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 public class ItemRequestMapper {
 
-    public static ItemRequest toItemRequest(ItemRequestCreateDto itemRequestCreateDto, User requestor){
+    public static ItemRequest toItemRequest(ItemRequestCreateDto itemRequestCreateDto, User requestor) {
         ItemRequest itemRequest = ItemRequest.builder()
                 .description(itemRequestCreateDto.getDescription())
                 .created(LocalDateTime.now())
