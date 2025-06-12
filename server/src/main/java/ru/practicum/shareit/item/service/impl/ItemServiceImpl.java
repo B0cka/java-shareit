@@ -149,12 +149,13 @@ public class ItemServiceImpl implements ItemService {
                 userId, itemId, LocalDateTime.now()
         ).orElseThrow(() -> new ValidationException("User has not completed booking for this item"));
 
-        Comment comment = new Comment();
-        comment.setAuthor(user);
-        comment.setItem(item);
-        comment.setDescription(commentDto.getText());
-        comment.setCreated(LocalDateTime.now());
-        comment.setBooking(booking);
+        Comment comment = Comment.builder()
+                .author(user)
+                .item(item)
+                .description(commentDto.getText())
+                .created(LocalDateTime.now())
+                .booking(booking)
+                .build();
 
         Comment saved = commentRepository.save(comment);
 

@@ -6,11 +6,12 @@ import ru.practicum.shareit.item.model.Comment;
 public class CommentDtoMapper {
 
     static CommentDto mapToDto(Comment comment) {
-        CommentDto dto = new CommentDto();
-        dto.setId(comment.getId());
-        dto.setText(comment.getDescription());
-        dto.setAuthorName(comment.getAuthor().getName());
-        dto.setCreated(comment.getCreated());
+        CommentDto dto = CommentDto.builder()
+                .id(comment.getId())
+                .text(comment.getDescription())
+                .authorName(comment.getAuthor().getName())
+                .created(comment.getCreated())
+                .build();
         return dto;
     }
 
