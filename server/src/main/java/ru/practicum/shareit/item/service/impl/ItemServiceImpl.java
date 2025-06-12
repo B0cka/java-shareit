@@ -28,6 +28,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -145,9 +146,12 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found with id: " + itemId));
 
-        Booking booking = bookingRepository.findFirstByBookerIdAndItemIdAndEndTimeBeforeOrderByEndTimeDesc(
-                userId, itemId, LocalDateTime.now()
-        ).orElseThrow(() -> new ValidationException("User has not completed booking for this item"));
+        Booking booking = bookingRepository
+                .findFirstByBookerIdAndItemIdAndEndTimeBeforeOrderByEndTimeDesc(userId, itemId, LocalDateTime.now());
+
+        if (booking == null) {
+            throw new ValidationException("User has not completed a booking for this item");
+        }
 
         Comment comment = Comment.builder()
                 .author(user)
@@ -161,6 +165,7 @@ public class ItemServiceImpl implements ItemService {
 
         return ItemMapper.mapToDto(saved);
     }
+
 
     public List<Comment> getComments(long userId) {
         log.info("Запрос на получение всех комментариев user с id: " + userId);

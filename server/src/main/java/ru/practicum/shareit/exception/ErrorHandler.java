@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -52,15 +53,16 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<Map<String, Object>> handleValidationException(ValidationException e) {
         return new ResponseEntity<>(
                 Map.of(
                         "timestamp", LocalDateTime.now(),
-                        "status", HttpStatus.BAD_REQUEST.value(),
+                        "status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
                         "error", "Bad Request",
                         "message", e.getMessage()
                 ),
-                HttpStatus.BAD_REQUEST
+                HttpStatus.INTERNAL_SERVER_ERROR
         );
     }
 
@@ -72,6 +74,19 @@ public class ErrorHandler {
                         "status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
                         "error", "Internal Server Error",
                         "message", e.getMessage()
+                ),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+        return new ResponseEntity<>(
+                Map.of(
+                        "timestamp", LocalDateTime.now(),
+                        "status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                        "error", "Internal Server Error",
+                        "message", "Invalid header parameter: " + e.getName()
                 ),
                 HttpStatus.INTERNAL_SERVER_ERROR
         );

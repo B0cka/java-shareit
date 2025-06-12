@@ -9,7 +9,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 @RequestMapping("/items")
 @RequiredArgsConstructor
 public class ItemController {
-    ItemClient itemClient;
+    private final ItemClient itemClient;
 
     @PatchMapping("/{itemId}")
     public ResponseEntity<Object> updateItem(@RequestHeader("X-Sharer-User-Id") long userId,

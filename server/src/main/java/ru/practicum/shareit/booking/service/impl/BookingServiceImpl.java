@@ -43,16 +43,16 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidationException("item must be available!");
         }
 
+        if (bookingDto.getStart().isBefore(LocalDateTime.now())) {
+            throw new ValidationException("start can not be in the past!");
+        }
+
         if (bookingDto.getEnd().isBefore(LocalDateTime.now())) {
             throw new ValidationException("end can not be in the past!");
         }
 
-        if (bookingDto.getStart().equals(bookingDto.getEnd())) {
-            throw new ValidationException("start can not be in the past!");
-        }
-
-        if (bookingDto.getStart().isBefore(LocalDateTime.now())) {
-            throw new ValidationException("start can not be in the past!");
+        if (!bookingDto.getEnd().isAfter(bookingDto.getStart())) {
+            throw new ValidationException("end must be after start!");
         }
 
         Booking booking = BookingMapper.toBooking(bookingDto, user, item);
@@ -137,8 +137,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingResponseDto> getOwnerBookings(Long ownerId, String stateStr) {
-        userRepository.findById(ownerId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+        userRepository.findById(ownerId).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
         BookingState state = BookingState.from(stateStr);
         List<Booking> bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(ownerId);
