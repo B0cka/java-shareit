@@ -154,7 +154,7 @@ class ItemServiceImplTest {
         when(userRepository.findById(bookerId)).thenReturn(Optional.of(booker));
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(bookingRepository.findFirstByBookerIdAndItemIdAndEndTimeBeforeOrderByEndTimeDesc(eq(bookerId), eq(itemId), any()))
-                .thenReturn(Optional.of(booking));
+                .thenReturn(booking);
         when(commentRepository.save(any(Comment.class))).thenAnswer(inv -> {
             Comment c = inv.getArgument(0);
             c.setId(1L);
@@ -172,7 +172,7 @@ class ItemServiceImplTest {
         when(userRepository.findById(bookerId)).thenReturn(Optional.of(user));
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(bookingRepository.findFirstByBookerIdAndItemIdAndEndTimeBeforeOrderByEndTimeDesc(eq(bookerId), eq(itemId), any()))
-                .thenReturn(Optional.empty());
+                .thenReturn(null);
 
         CommentDto commentDto = CommentDto.builder().text("Test").build();
         assertThrows(ValidationException.class, () -> itemService.addComment(bookerId, itemId, commentDto));

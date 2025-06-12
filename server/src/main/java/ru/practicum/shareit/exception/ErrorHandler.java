@@ -53,16 +53,16 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Map<String, Object>> handleValidationException(ValidationException e) {
         return new ResponseEntity<>(
                 Map.of(
                         "timestamp", LocalDateTime.now(),
-                        "status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                        "status", HttpStatus.BAD_REQUEST.value(),
                         "error", "Bad Request",
                         "message", e.getMessage()
                 ),
-                HttpStatus.INTERNAL_SERVER_ERROR
+                HttpStatus.BAD_REQUEST
         );
     }
 
