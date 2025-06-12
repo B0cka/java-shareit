@@ -22,6 +22,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.impl.ItemServiceImpl;
+import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -175,5 +176,104 @@ class ItemServiceImplTest {
 
         CommentDto commentDto = CommentDto.builder().text("Test").build();
         assertThrows(ValidationException.class, () -> itemService.addComment(bookerId, itemId, commentDto));
+    }
+
+    @Test
+    @DisplayName("Удаление вещи пользователем")
+    void testDeleteItem() {
+        itemService.deleteItem(userId, itemId);
+        verify(itemRepository).deleteByUserIdAndItemId(userId, itemId);
+    }
+
+    @Test
+    @DisplayName("Получение комментариев пользователя")
+    void testGetComments() {
+        Comment comment = Comment.builder()
+                .id(1L)
+                .description("Comment")
+                .author(user)
+                .item(item)
+                .created(LocalDateTime.now())
+                .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(commentRepository.findByAuthorId(userId)).thenReturn(List.of(comment));
+
+        List<Comment> comments = itemService.getComments(userId);
+
+        assertEquals(1, comments.size());
+        assertEquals("Comment", comments.get(0).getDescription());
+    }
+
+
+    @Test
+    @DisplayName("Получение комментариев — пользователь не найден")
+    void testGetComments_UserNotFound() {
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> itemService.getComments(userId));
+    }
+
+    @Test
+    @DisplayName("Получение всех вещей пользователя")
+    void testAllItemsFromUser() {
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(itemRepository.findByOwnerId(userId)).thenReturn(List.of(item));
+
+        List<ItemDto> items = itemService.allItemsFormUser(userId);
+
+        assertEquals(1, items.size());
+        assertEquals(item.getName(), items.get(0).getName());
+    }
+
+    @Test
+    @DisplayName("Получение всех вещей — пользователь не найден")
+    void testAllItemsFromUser_UserNotFound() {
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> itemService.allItemsFormUser(userId));
+    }
+
+    @Test
+    @DisplayName("Ошибка при null available")
+    void testAddNewItem_NullAvailable() {
+        itemDto.setAvailable(null);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        assertThrows(ValidationException.class, () -> itemService.addNewItem(userId, itemDto));
+    }
+
+    @Test
+    @DisplayName("Ошибка при пустом имени")
+    void testAddNewItem_EmptyName() {
+        itemDto.setName("");
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        assertThrows(ValidationException.class, () -> itemService.addNewItem(userId, itemDto));
+    }
+
+    @Test
+    @DisplayName("Ошибка при null описании")
+    void testAddNewItem_NullDescription() {
+        itemDto.setDescription(null);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        assertThrows(ValidationException.class, () -> itemService.addNewItem(userId, itemDto));
+    }
+
+    @Test
+    @DisplayName("Ошибка при несуществующем пользователе")
+    void testAddNewItem_UserNotFound() {
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> itemService.addNewItem(userId, itemDto));
+    }
+
+    @Test
+    @DisplayName("addNewItem — с ItemRequest")
+    void testAddNewItem_WithRequest() {
+        itemDto.setRequestId(1L);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(itemRequestRepository.findById(1L)).thenReturn(Optional.of(ItemRequest.builder().id(1L).build()));
+        when(itemRepository.save(any(Item.class))).thenAnswer(i -> i.getArgument(0));
+
+        ItemDto result = itemService.addNewItem(userId, itemDto);
+        assertEquals(itemDto.getName(), result.getName());
     }
 }

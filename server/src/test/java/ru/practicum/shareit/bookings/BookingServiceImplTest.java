@@ -178,4 +178,147 @@ class BookingServiceImplTest {
         List<BookingResponseDto> result = bookingService.getOwnerBookings(owner.getId(), BookingState.ALL.name());
         assertEquals(1, result.size());
     }
+
+    @Test
+    @DisplayName("Ошибка при end в прошлом")
+    void testAddBooking_EndBeforeNow() {
+        BookingRequestDto invalidDto = BookingRequestDto.builder()
+                .itemId(itemId)
+                .start(LocalDateTime.now().plusHours(1))
+                .end(LocalDateTime.now().minusHours(1))
+                .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+
+        assertThrows(ValidationException.class, () -> bookingService.addBooking(userId, invalidDto));
+    }
+
+    @Test
+    @DisplayName("Ошибка при start == end")
+    void testAddBooking_StartEqualsEnd() {
+        LocalDateTime now = LocalDateTime.now().plusDays(1);
+        BookingRequestDto dto = BookingRequestDto.builder()
+                .itemId(itemId)
+                .start(now)
+                .end(now)
+                .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+
+        assertThrows(ValidationException.class, () -> bookingService.addBooking(userId, dto));
+    }
+
+    @Test
+    @DisplayName("Ошибка при start < now")
+    void testAddBooking_StartInPast() {
+        BookingRequestDto dto = BookingRequestDto.builder()
+                .itemId(itemId)
+                .start(LocalDateTime.now().minusMinutes(10))
+                .end(LocalDateTime.now().plusDays(1))
+                .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+
+        assertThrows(ValidationException.class, () -> bookingService.addBooking(userId, dto));
+    }
+
+    @Test
+    @DisplayName("approveBooking — не владелец вещи")
+    void testApproveBooking_NotOwner() {
+        Booking booking = Booking.builder().id(bookingId).status(BookingStatus.WAITING).item(item).build();
+        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
+
+        assertThrows(ValidationException.class, () -> bookingService.approveBooking(999L, bookingId, true));
+    }
+
+    @Test
+    @DisplayName("approveBooking — статус не WAITING")
+    void testApproveBooking_InvalidStatus() {
+        Booking booking = Booking.builder().id(bookingId).status(BookingStatus.APPROVED).item(item).build();
+        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
+
+        assertThrows(ConflictException.class, () -> bookingService.approveBooking(owner.getId(), bookingId, true));
+    }
+
+    @DisplayName("getUserBookings — некорректный state")
+    @Test
+    void testGetUserBookings_InvalidState() {
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        assertThrows(IllegalArgumentException.class, () -> bookingService.getUserBookings(userId, "UNKNOWN"));
+    }
+
+    @DisplayName("getBooking — не найдено")
+    @Test
+    void testGetBooking_NotFound() {
+        when(bookingRepository.findById(bookingId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> bookingService.getBooking(userId, bookingId));
+    }
+
+    @Test
+    @DisplayName("getUserBookings — все состояния")
+    void testGetUserBookings_States() {
+        for (BookingState state : BookingState.values()) {
+            Booking booking = BookingMapper.toBooking(bookingRequestDto, user, item);
+            booking.setId(bookingId);
+
+            switch (state) {
+                case CURRENT -> {
+                    booking.setStart(LocalDateTime.now().minusHours(1));
+                    booking.setEndTime(LocalDateTime.now().plusHours(1));
+                    booking.setStatus(BookingStatus.APPROVED);
+                }
+                case FUTURE -> {
+                    booking.setStart(LocalDateTime.now().plusDays(1));
+                    booking.setEndTime(LocalDateTime.now().plusDays(2));
+                    booking.setStatus(BookingStatus.APPROVED);
+                }
+                case PAST -> {
+                    booking.setStart(LocalDateTime.now().minusDays(2));
+                    booking.setEndTime(LocalDateTime.now().minusDays(1));
+                    booking.setStatus(BookingStatus.APPROVED);
+                }
+                case WAITING -> {
+                    booking.setStart(LocalDateTime.now().plusDays(1));
+                    booking.setEndTime(LocalDateTime.now().plusDays(2));
+                    booking.setStatus(BookingStatus.WAITING);
+                }
+                case REJECTED -> {
+                    booking.setStart(LocalDateTime.now().plusDays(1));
+                    booking.setEndTime(LocalDateTime.now().plusDays(2));
+                    booking.setStatus(BookingStatus.REJECTED);
+                }
+                case ALL -> {
+                    booking.setStart(LocalDateTime.now().minusDays(1));
+                    booking.setEndTime(LocalDateTime.now().plusDays(1));
+                    booking.setStatus(BookingStatus.APPROVED);
+                }
+            }
+
+            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+            when(bookingRepository.findByBookerIdOrderByStartDesc(userId)).thenReturn(List.of(booking));
+
+            List<BookingResponseDto> result = bookingService.getUserBookings(userId, state.name());
+            assertEquals(1, result.size(), "State failed: " + state);
+        }
+    }
+
+    @Test
+    @DisplayName("Should throw ConflictException when trying to reject already rejected booking")
+    void testRejectAlreadyRejectedBooking() {
+        Booking booking = BookingMapper.toBooking(bookingRequestDto, user, item);
+        booking.setId(bookingId);
+        booking.setStatus(BookingStatus.REJECTED); // Уже отклонено
+
+        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
+
+        assertThrows(ConflictException.class,
+                () -> bookingService.approveBooking(owner.getId(), bookingId, false));
+    }
+
+
 }
