@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:16.1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+    ports:
+      - "6541:5432"
+
+  shareit-server:
+    build:
+      context: ./server
+    ports:
+      - "9090:9090"
+    depends_on:
+      - db
+
+  shareit-gateway:
+    build:
+      context: ./gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - shareit-server
