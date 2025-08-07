@@ -1,2 +1,54 @@
 # java-shareit
-Template repository for Shareit project.
+
+**Java‑based backend for an item sharing and rental platform.**  
+Template repository based on the Yandex Practicum project "Share It".
+
+---
+
+## Описание проекта
+
+Сервис **ShareIt** позволяет пользователям делиться своими вещами или арендовать чужие: создавать запросы на аренду, управлять вещами, оставлять отзывы, а также искать и бронировать предметы.
+
+Архитектура:
+- `shareit-server` — основной сервис с бизнес‑логикой
+- `shareit-gateway` — шлюз для валидации входящих запросов и маршрутизации
+
+---
+
+## Функциональность
+
+- Регистрация, просмотр и редактирование пользователей
+- Управление вещами (добавление, редактирование, просмотр)
+- Поиск по названию или описанию
+- Создание и обработка запросов на аренду (подтверждение/отказ)
+- Получение списка бронирований (авторам и владельцам)
+- Оставление отзывов после завершения аренды
+
+---
+
+## Технологии и стек
+
+- **Java 11**, **Spring Boot**, **Spring Data / Hibernate**, **JPA**
+- **REST API**
+- **Docker**, **Docker Compose**
+- **PostgreSQL**
+- **JUnit**, **Postman**
+- Архитектура — модульная / микросервисная (gateway + server)
+
+---
+
+## Быстрый старт
+
+### Предварительные требования
+
+- JDK 11+
+- Maven
+- Docker и Docker Compose
+
+### Шаги запуска:
+
+```bash
+git clone <репозиторий>
+cd java-shareit
+mvn clean install
+docker-compose up
